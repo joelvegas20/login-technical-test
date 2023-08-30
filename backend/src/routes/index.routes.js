@@ -6,6 +6,7 @@ const bcrypt = require("bcryptjs");
 const fs = require("fs");
 
 // Local Imports.
+const { sendEmailToUser } = require("../middlewares/email.middkeware");
 const upload = require("../middlewares/files.middleware");
 const User = require("../database/schemas/user.schema");
 const auth = require("../middlewares/auth.middleware");
@@ -29,7 +30,6 @@ router.post(
   async (req, res) => {
     // Get Server URL.
     const url = req.protocol + "://" + req.get("host");
-
     // Check if there is a file.
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -37,7 +37,6 @@ router.post(
         errors: errors.array(),
       });
     }
-
     // Get data from request.
     const { username, email, password } = req.body;
     try {
@@ -56,10 +55,13 @@ router.post(
       user = new User({
         email,
         password,
-        profilePicture: url + "/profileTemps/" + email.split("@")[0] + "/" + req.file.filename,
+        profilePicture:
+          url +
+          "/profileTemps/" +
+          email.split("@")[0] +
+          "/" +
+          req.file.filename,
       });
-
-      console.log(url + "/profileTemps/" + email.split("@")[0] + "/" + req.file.filename)
 
       // Salt and hash password.
       const salt = await bcrypt.genSalt(10);
@@ -74,6 +76,8 @@ router.post(
           id: user.id,
         },
       };
+      // Send email.
+      await sendEmailToUser(user);
 
       // Create token and send it.
       jwt.sign(
@@ -92,14 +96,19 @@ router.post(
     } catch (err) {
       // Delete profilePicture if there is an error.
       if (req.file) {
-        fs.unlink("./src/profileTemps/" + req.file.filename, (err) => {
-          if (err) {
-            console.error(err);
-            return;
+        fs.unlink(
+          "./src/profileTemps/" +
+            req.body.email.split("@")[0] +
+            "/" +
+            req.file.filename,
+          (err) => {
+            if (err) {
+              console.error(err);
+              return;
+            }
           }
-        });
+        );
       }
-
       // Return error.
       res.status(err.status || 500).json({
         message: err.message || "Something went wrong",

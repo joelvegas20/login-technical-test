@@ -1,13 +1,20 @@
+// Third Party Imports.
 import { Box, Button, Container, FormLabel, Typography } from "@mui/material";
+import { useDispatch } from "react-redux";
 import { useRef, useState } from "react";
+import Cookies from "universal-cookie";
 import { Link } from "wouter";
-import { BootstrapInput } from "../theme";
+
+// Local Imports.
 import { sendRegisterDataToBackend } from "../helpers/sendRegister";
 import { getSessionAction } from "../redux/actions";
+import { BootstrapInput } from "../theme";
 
-import { useDispatch } from "react-redux";
-
+// RegisterPage Component.
 export default function RegisterPage() {
+  // Cookies instance.
+  const cookies = new Cookies();
+  // Dispatch.
   const dispatch = useDispatch();
   // Form data.
   const [formData, setFormData] = useState({
@@ -37,12 +44,13 @@ export default function RegisterPage() {
       alert("Please fill all the fields correctly.");
       return;
     }
-    // prepare data as FormData object, and send it to the backend.
+    // Prepare data to send.
     const formDataToSend = new FormData();
     formDataToSend.append("email", formData.email);
     formDataToSend.append("password", formData.password);
     formDataToSend.append("profilePicture", formData.profilePicture);
 
+    // Send data.
     const token = await sendRegisterDataToBackend(formDataToSend);
 
     // Reset form data.
@@ -50,23 +58,29 @@ export default function RegisterPage() {
 
     // Automatically login after register
     if (token) {
-      dispatch(getSessionAction(token));
+      // Set cookie.
+      cookies.set("token", token, { path: "/" });
+
+      // Get session.
+      await dispatch(getSessionAction(token));
+
       // Redirect to home page without reloading the page.
       window.history.pushState(null, null, "/");
     } else {
+      // Show error message.
       alert("Error, please try again");
     }
   };
 
-  // Hidden file input element
+  // Hidden file input element.
   const hiddenFileInput = useRef(null);
 
-  // Programatically click the hidden file input element
+  // Handle click on button to open file input.
   const handleClick = (event) => {
     hiddenFileInput.current.click();
   };
 
-  // Call a function (passed as a prop from the parent component)
+  // Handle file input change.
   const handleChangeFile = (event) => {
     const fileUploaded = event.target.files[0];
     if (!fileUploaded) {
@@ -105,29 +119,23 @@ export default function RegisterPage() {
           sx={{ color: "#000000" }}
           fontFamily={"inherit"}
         >
-          Here we go 👋
+          Welcome 👋  
         </Typography>
         <Typography
           variant="h6"
           sx={{ color: "#000000" }}
           fontFamily={"inherit"}
         >
-          Today is a new day. It's your day. You shape it. Sign in to start
-          managing your projects.
+          We're glad you've decided to register with us. This registration will
+          grant you access to all the features of our platform.
         </Typography>
         <Box
           component="form"
           onSubmit={handleSubmit}
-          sx={
-            {
-              // backgroundColor: "primary.main",
-            }
-          }
           display="flex"
           flexDirection="column"
           gap={2}
           py={4}
-          // backgroundColor="primary.main"
         >
           <Box>
             <FormLabel sx={{ color: "#000000" }}>Email</FormLabel>
@@ -172,10 +180,9 @@ export default function RegisterPage() {
               accept="image/*"
               onChange={handleChangeFile}
               ref={hiddenFileInput}
-              style={{ display: "none" }} // Make the file input element invisible
+              style={{ display: "none" }}
             />
           </Box>
-          {/* No button mayus */}
           <Button
             color="primaryButton"
             variant="contained"
@@ -186,7 +193,7 @@ export default function RegisterPage() {
           </Button>
         </Box>
         <Typography sx={{ color: "#000000", textAlign: "center" }}>
-          Don't have an account?{" "}
+          Do you have an account?{" "}
           <Link href="/login" style={{ color: "blue", textDecoration: "none" }}>
             Sign in
           </Link>

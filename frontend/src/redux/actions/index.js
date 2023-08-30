@@ -10,11 +10,9 @@ export const LOGOUT = "user/logout";
 export const getSessionAction = (token) => {
     return async (dispatch) => {
         const data = await getSession(token);
-        console.log (token.token);
         dispatch({
             type: LOGIN,
             payload: {
-                token: token.token,
                 email: data.email,
                 profilePicture: data.profilePicture,
             }
@@ -22,6 +20,7 @@ export const getSessionAction = (token) => {
     };
 };
 
+// Logout User Action.
 export const logoutAction = () => {
     return async (dispatch) => {
         dispatch({

@@ -15,7 +15,7 @@ import './index.css';
  * @description This App is a simple example test for a login page.
  * @version 0.0.1
  * @namespace frontend
- * @since 28/08/2023
+ * @since 29/08/2023
  */
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(

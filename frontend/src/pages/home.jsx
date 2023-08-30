@@ -1,4 +1,8 @@
-import React from "react";
+// Third Party Imports.
+import { useDispatch, useSelector } from "react-redux";
+import LogoutIcon from "@mui/icons-material/Logout";
+import React, { useEffect } from "react";
+import Cookies from "universal-cookie";
 import {
   Button,
   Container,
@@ -10,12 +14,45 @@ import {
   List,
   IconButton,
 } from "@mui/material";
-import { LinkedinIcon, GithubIcon, GmailIcon } from "../components/icons";
-import LogoutIcon from "@mui/icons-material/Logout";
-import { useSelector } from "react-redux";
 
+// Local Imports.
+import { LinkedinIcon, GithubIcon, GmailIcon } from "../components/icons";
+import { getSessionAction } from "../redux/actions";
+
+// HomePage Component.
 export default function HomePage() {
-  const { email , profilePicture } = useSelector((state) => state.userData);
+  // Get data from redux store.
+  const { email, profilePicture } = useSelector((state) => state.userData);
+
+  // Cookies instance.
+  const cookies = new Cookies();
+
+  // Dispatch.
+  const dispatch = useDispatch();
+
+  // Logout Button Handler.
+  const logout = () => {
+    // Remove cookie.
+    cookies.remove("token");
+    // Redirect to login page and reload the page.
+    window.history.pushState(null, null, "/login");
+    window.location.reload();
+  };
+
+  // Get session on page load.
+  useEffect(() => {
+    // Get data from backend with the token.
+    const token = cookies.get("token");
+
+    if (token) {
+      // Get session.
+      dispatch(getSessionAction(token));
+    } else {
+      // Redirect to login page and reload the page.
+      window.history.pushState(null, null, "/login");
+      window.location.reload();
+    }
+  }, []);
 
   return (
     <Container maxWidth="xl">
@@ -41,6 +78,7 @@ export default function HomePage() {
             color="primaryButton"
             variant="contained"
             href="/login"
+            onClick={logout}
             sx={{ display: { xs: "none", sm: "block" } }}
           >
             Logout
@@ -93,7 +131,7 @@ export default function HomePage() {
         >
           <Box width={"50%"} display={"flex"} alignItems={"center"}>
             <Typography sx={{ color: "#000000" }}>
-              © all rights reserved 2023, Joel Vegas.
+              © 2023 ALL RIGHTS RESERVED
             </Typography>
           </Box>
           <List

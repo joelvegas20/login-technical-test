@@ -1,18 +1,27 @@
+// Third Party Imports.
 import { Box, Button, Container, FormLabel, Typography } from "@mui/material";
+import { useDispatch } from "react-redux";
+import Cookies from "universal-cookie";
 import { useState } from "react";
 import { Link } from "wouter";
-import { BootstrapInput } from "../theme";
+
+// Local Imports.
 import { sendLoginDataToBackend } from "../helpers/sendLogin";
-import { useDispatch } from "react-redux";
 import { getSessionAction } from "../redux/actions";
+import { BootstrapInput } from "../theme";
 
-
-
+// LoginPage Component.
 export default function LoginPage() {
+  // Cookies instance.
+  const cookies = new Cookies();
+
+  // Form data.
   const [formData, setFormData] = useState({ email: "", password: "" });
 
+  // Dispatch.
   const dispatch = useDispatch();
 
+  // Handle form data changes.
   const handleChange = (event) => {
     const { name, value } = event.target;
     setFormData((prevData) => ({
@@ -21,27 +30,31 @@ export default function LoginPage() {
     }));
   };
 
+  // Handle form submission.
   const handleSubmit = async (event) => {
     event.preventDefault();
-    if (!formData.username || !formData.password ) {
+
+    // Check if the form is valid.
+    if (!formData.email || !formData.password) {
       alert("Please fill all the fields correctly.");
       return;
     }
-
     // Send data.
     const token = await sendLoginDataToBackend(formData);
-
+    // Reset form data.
     setFormData({ email: "", password: "" });
-
-    // Get session.
+    // Check if the token is valid.
     if (token) {
+      // Get session.
       await dispatch(getSessionAction(token));
+      // Set cookie.
+      cookies.set("token", token, { path: "/" });
       // Redirect to home page without reloading the page.
       window.history.pushState(null, null, "/");
-    }else {
+    } else {
+      // Show error message.
       alert("Error, please try again");
     }
-
   };
 
   return (
