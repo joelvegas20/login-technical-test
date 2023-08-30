@@ -6,13 +6,14 @@ cd backend
 # Instala las dependencias
 yarn install
 
+YARN_PATH=$(which yarn)
+
 # Construye el proyecto si es necesario
 # (esto depende de cómo esté configurado tu proyecto backend)
 # yarn build
 
 # Inicia el backend con pm2
-PORT=8080 DATABASE_URL=mongodb+srv://joelvegas:Ia72S4axkrdrwYdK@cluster0.ftus1wu.mongodb.net/?retryWrites=true&w=majority pm2 start yarn --name "backend" -- start
-
+PORT=8080 DATABASE_URL=mongodb+srv://joelvegas:Ia72S4axkrdrwYdK@cluster0.ftus1wu.mongodb.net/?retryWrites=true&w=majority pm2 start $YARN_PATH --name "backend" -- start
 
 # Volver al directorio principal
 cd ..
@@ -32,4 +33,4 @@ yarn build
 # (Asegúrate de tener `serve` instalado globalmente o en tu proyecto)
 
 # O si tu frontend tiene un comando 'start' propio:
-pm2 start yarn --name "frontend" -- start
+pm2 start $YARN_PATH --name "frontend" -- start
